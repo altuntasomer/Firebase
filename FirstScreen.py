@@ -8,9 +8,23 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+import pyrebase
+import Database
+import Jobs
 
 class Ui_MainWindow(object):
+
+
+
+    def __init__(self, config):
+
+        self.database = Database.Database(config)
+        self.jobs_collection = self.database.getChildData("Jobs")
+        self.user_collection = self.database.getChildData("Users")
+        self.joblist = list()
+
+
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1179, 600)
@@ -125,6 +139,9 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        self.listWidget.itemClicked.connect(self.listwidgetclicked)
+
+        self.list()
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -134,20 +151,25 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.search.setText(_translate("MainWindow", "Bul"))
         self.pushButton.setText(_translate("MainWindow", "Rapor"))
-        self.pixmap2.setText(_translate("MainWindow", "TextLabel"))
-        self.pixmap3.setText(_translate("MainWindow", "TextLabel"))
-        self.pixmap4.setText(_translate("MainWindow", "TextLabel"))
+
         self.download_image.setText(_translate("MainWindow", "Fotoğrafları Yükle"))
-        self.description.setText(_translate("MainWindow", "TextLabel"))
-        self.place.setText(_translate("MainWindow", "TextLabel"))
-        self.time.setText(_translate("MainWindow", "TextLabel"))
 
 
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+    def listwidgetclicked(self, item):
+
+        self.selectedItem = self.listWidget.selectedIndexes()[0].row()
+        job = self.joblist[self.selectedItem]
+        self.description.setText(job.get_single_info("description"))
+        self.place.setText(job.get_single_info("place"))
+        self.time.setText(job.get_single_info("date"))
+        self.user.setText(job.get_single_info("username")),
+
+    def list(self):
+
+        for i in self.jobs_collection:
+            if type(i) is dict:
+
+                self.joblist.append(Jobs.Jobs(i, self.user_collection[int(i["user_id"])]["name"]))
+
+        for i in self.joblist:
+            self.listWidget.addItem(i.get_single_info("description"))
