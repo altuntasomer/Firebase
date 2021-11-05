@@ -1,11 +1,14 @@
 from datetime import datetime
 from datetime import timedelta
+from docxtpl import DocxTemplate
+import jinja2
 class Jobs():
 
-    def __init__(self, info, user):
+    def __init__(self, info, user, campus):
         self.info = info
-        #self.info["start_time"] = self.calculate_start_time()
+        self.info["start_time"] = self.calculate_start_time()
         self.info["username"] = user
+        self.info["campus"] = campus
 
 
 
@@ -24,3 +27,31 @@ class Jobs():
 
     def get_single_info(self, field):
         return self.info[field]
+
+    def get_filepath(self, mode):
+        if mode == 'r':
+            local_path = self.info["username"] + "/" + self.info["id"]
+        elif mode == 'f':
+            local_path = "is/" + self.info["id"]
+
+        return local_path
+
+    def report(self):
+        mark = "X"
+        csut = ""
+        ckuc = ""
+        if self.info["campus"] == "S":
+            csut = mark
+        else:
+            ckuc = mark
+        contex = {
+            'p': self.info["username"],
+            'time': self.info["time"],
+            'description': self.info["description"],
+            'date': self.info["start_time"],
+            'mark': mark,
+            'cS': csut,
+            'cK': ckuc,
+            'place': self.info["place"]
+        }
+        return contex

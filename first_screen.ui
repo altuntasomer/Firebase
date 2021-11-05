@@ -32,9 +32,6 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBox_campus"/>
-          </item>
-          <item>
            <widget class="QComboBox" name="comboBox_user"/>
           </item>
           <item>

@@ -4,16 +4,18 @@ import Jobs
 import pyrebase
 import json
 import FirstScreen
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QApplication, QMainWindow
+
 firebase_config = {
-        #add api here
+        #project keys
+
         "serviceAccount": "serviceAccountKey.json"
         }
 
 
 
-app = QtWidgets.QApplication(sys.argv)
-MainWindow = QtWidgets.QMainWindow()
+app = QApplication(sys.argv)
+MainWindow = QMainWindow()
 ui = FirstScreen.Ui_MainWindow(firebase_config)
 ui.setupUi(MainWindow)
 MainWindow.show()

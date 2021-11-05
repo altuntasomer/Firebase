@@ -5,12 +5,15 @@
 # Created by: PyQt5 UI code generator 5.14.1
 #
 # WARNING! All changes made in this file will be lost!
-
+import datetime
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import pyrebase
+from docxtpl import DocxTemplate
+
 import Database
 import Jobs
+from pathlib import Path
 
 class Ui_MainWindow(object):
 
@@ -22,6 +25,7 @@ class Ui_MainWindow(object):
         self.jobs_collection = self.database.getChildData("Jobs")
         self.user_collection = self.database.getChildData("Users")
         self.joblist = list()
+        self.jobIndexList = list()
 
 
 
@@ -46,17 +50,19 @@ class Ui_MainWindow(object):
         self.lineEdit.setSizePolicy(sizePolicy)
         self.lineEdit.setObjectName("lineEdit")
         self.verticalLayout_3.addWidget(self.lineEdit)
-        self.comboBox_campus = QtWidgets.QComboBox(self.centralwidget)
-        self.comboBox_campus.setObjectName("comboBox_campus")
-        self.verticalLayout_3.addWidget(self.comboBox_campus)
+
         self.comboBox_user = QtWidgets.QComboBox(self.centralwidget)
         self.comboBox_user.setObjectName("comboBox_user")
         self.verticalLayout_3.addWidget(self.comboBox_user)
         self.dateEdit_start = QtWidgets.QDateEdit(self.centralwidget)
         self.dateEdit_start.setObjectName("dateEdit_start")
+        self.dateEdit_start.setDateTime(QtCore.QDateTime.currentDateTime())
+        self.dateEdit_start.setCalendarPopup(True)
         self.verticalLayout_3.addWidget(self.dateEdit_start)
         self.dateEdit_end = QtWidgets.QDateEdit(self.centralwidget)
         self.dateEdit_end.setObjectName("dateEdit_end")
+        self.dateEdit_end.setDateTime(QtCore.QDateTime.currentDateTime())
+        self.dateEdit_end.setCalendarPopup(True)
         self.verticalLayout_3.addWidget(self.dateEdit_end)
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
@@ -139,8 +145,12 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
-        self.listWidget.itemClicked.connect(self.listwidgetclicked)
 
+
+
+        self.listWidget.itemClicked.connect(self.listwidgetclicked)
+        self.pushButton.clicked.connect(self.report)
+        self.search.clicked.connect(self.filter)
         self.list()
 
         self.retranslateUi(MainWindow)
@@ -151,25 +161,73 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.search.setText(_translate("MainWindow", "Bul"))
         self.pushButton.setText(_translate("MainWindow", "Rapor"))
-
         self.download_image.setText(_translate("MainWindow", "Fotoğrafları Yükle"))
+        self.comboBox_user.addItem("Tümü")
+        self.comboBox_user.addItem("Hüseyin ALTUNTAŞ")
+        self.comboBox_user.addItem("Şevket ŞAHİN")
+        self.comboBox_user.addItem("Hasan UYAR")
+        self.comboBox_user.addItem("Hüseyin ER")
+        self.comboBox_user.addItem("Fatih GÖKTAŞ")
+        self.comboBox_user.addItem("Aydın İMRAK")
+        self.comboBox_user.addItem("Murat TAMKOÇ")
+        self.comboBox_user.addItem("Gökçin KÜÇÜKGÖKSU")
+        self.comboBox_user.addItem("Ahmet AKDEMİR")
+        self.comboBox_user.addItem("Kemal KARACAKAYA")
 
 
     def listwidgetclicked(self, item):
 
         self.selectedItem = self.listWidget.selectedIndexes()[0].row()
-        job = self.joblist[self.selectedItem]
+        job = self.joblist[self.jobIndexList[self.selectedItem]]
         self.description.setText(job.get_single_info("description"))
         self.place.setText(job.get_single_info("place"))
         self.time.setText(job.get_single_info("date"))
         self.user.setText(job.get_single_info("username")),
 
     def list(self):
-
+        j = 0
         for i in self.jobs_collection:
             if type(i) is dict:
 
-                self.joblist.append(Jobs.Jobs(i, self.user_collection[int(i["user_id"])]["name"]))
+                self.joblist.append(Jobs.Jobs(i, self.user_collection[int(i["user_id"])]["name"], self.user_collection[int(i["user_id"])]["campus"]))
+                self.jobIndexList.append(j)
+                j+=1
 
+        for i in self.jobIndexList:
+            self.listWidget.addItem(self.joblist[i].get_single_info("description"))
+
+    def filter(self):
+
+        start_date = self.dateEdit_start.date().toPyDate()
+        end_date = self.dateEdit_end.date().toPyDate()
+        start_date = datetime.datetime(start_date.year, start_date.month, start_date.day)
+        end_date = datetime.datetime(end_date.year, end_date.month, end_date.day)
+        user = self.comboBox_user.currentIndex()
+        self.jobIndexList.clear()
+        j = 0
         for i in self.joblist:
-            self.listWidget.addItem(i.get_single_info("description"))
+
+            date = datetime.datetime.strptime(i.get_single_info("date"), "%d.%m.%Y,%H:%M")
+            if date >= start_date and date <= end_date :
+                self.jobIndexList.append(j)
+
+            j += 1
+
+        self.listWidget.clear()
+        for i in self.jobIndexList:
+            print(i)
+            self.listWidget.addItem(self.joblist[i].get_single_info("description"))
+
+    def report(self):
+        size = len(self.jobIndexList)
+        j = 0
+        #doc = DocxTemplate('/home/omer/Desktop/sablona.docx')
+        for i in self.jobIndexList:
+            print(str(j), ' / ', str(size))
+            contex = self.joblist[i].report()
+            path = self.joblist[i].get_filepath('r') + ".docx"
+            Path(path).mkdir(parents=True, exist_ok=True)
+            j+=1
+            print(path)
+            #doc.render(contex)
+            #doc.save(path)
