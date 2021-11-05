@@ -144,6 +144,8 @@ class Ui_MainWindow(object):
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
+        self.pixmaps = [self.pixmap1, self.pixmap2, self.pixmap3, self.pixmap4]
+
         MainWindow.setStatusBar(self.statusbar)
 
 
@@ -151,6 +153,7 @@ class Ui_MainWindow(object):
         self.listWidget.itemClicked.connect(self.listwidgetclicked)
         self.pushButton.clicked.connect(self.report)
         self.search.clicked.connect(self.filter)
+        self.download_image.clicked.connect(self.show_file)
         self.list()
 
         self.retranslateUi(MainWindow)
@@ -231,3 +234,15 @@ class Ui_MainWindow(object):
             print(path)
             #doc.render(contex)
             #doc.save(path)
+
+    def show_file(self):
+        job = self.joblist[self.jobIndexList[self.selectedItem]]
+        path = job.get_filepath('f')
+        self.database.downloadImage(path)
+        for i in range(0,4):
+            try:
+                pathT = path + "/" + str(i) + ".jpg"
+                print(pathT)
+                self.pixmaps[i].setPixmap(QtGui.QPixmap(pathT).scaled(200, 200, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation))
+            except Exception as e:
+                print(e)
