@@ -26,7 +26,7 @@ class Database():
                 print(pathT)
 
                 self.storage.child(pathT).download(pathT)
-                print(i)
+
             except Exception as e:
                 print(e)
 
