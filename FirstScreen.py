@@ -50,7 +50,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.addWidget(self.comboBox_user)
         self.dateEdit_start = QtWidgets.QDateEdit(self.centralwidget)
         self.dateEdit_start.setObjectName("dateEdit_start")
-        self.dateEdit_start.setDateTime(QtCore.QDateTime.currentDateTime())
+        self.dateEdit_start.setDateTime(QtCore.QDateTime(QtCore.QDate(2021,8,13)))
         self.dateEdit_start.setCalendarPopup(True)
         self.verticalLayout_3.addWidget(self.dateEdit_start)
         self.dateEdit_end = QtWidgets.QDateEdit(self.centralwidget)
@@ -155,7 +155,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "İş Takip Programı"))
         self.search.setText(_translate("MainWindow", "Bul"))
         self.pushButton.setText(_translate("MainWindow", "Rapor"))
         self.download_image.setText(_translate("MainWindow", "Fotoğrafları Yükle"))
@@ -214,22 +214,22 @@ class Ui_MainWindow(object):
 
         self.listWidget.clear()
         for i in self.jobIndexList:
-            print(i)
+
             self.listWidget.addItem(self.joblist[i].get_single_info("description"))
 
     def report(self):
         size = len(self.jobIndexList)
         j = 0
-        doc = DocxTemplate('/home/omer/Desktop/sablona.docx')
+
         for i in self.jobIndexList:
-            print(str(j), ' / ', str(size))
+            print(j)
             contex = self.joblist[i].report()
-            path = self.joblist[i].get_filepath('r') + ".docx"
+            path = self.joblist[i].get_filepath('r')
             Path(path).mkdir(parents=True, exist_ok=True)
             j+=1
-            print(path)
+            doc = DocxTemplate("sablona.docx")
             doc.render(contex)
-            doc.save(path)
+            doc.save(path + "/rapor.docx")
 
     def show_file(self):
         job = self.joblist[self.jobIndexList[self.selectedItem]]
