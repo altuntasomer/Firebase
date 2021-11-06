@@ -4,7 +4,7 @@ import datetime
 from PyQt5 import QtCore, QtGui, QtWidgets
 import pyrebase
 from docxtpl import DocxTemplate
-
+from os.path import exists
 import Database
 import Jobs
 from pathlib import Path
@@ -179,7 +179,9 @@ class Ui_MainWindow(object):
         self.description.setText(job.get_single_info("description"))
         self.place.setText(job.get_single_info("place"))
         self.time.setText(job.get_single_info("date"))
-        self.user.setText(job.get_single_info("username")),
+        self.user.setText(job.get_single_info("username"))
+        for i in self.pixmaps:
+            i.clear()
 
     def list(self):
         j = 0
@@ -218,7 +220,7 @@ class Ui_MainWindow(object):
     def report(self):
         size = len(self.jobIndexList)
         j = 0
-        #doc = DocxTemplate('/home/omer/Desktop/sablona.docx')
+        doc = DocxTemplate('/home/omer/Desktop/sablona.docx')
         for i in self.jobIndexList:
             print(str(j), ' / ', str(size))
             contex = self.joblist[i].report()
@@ -226,12 +228,14 @@ class Ui_MainWindow(object):
             Path(path).mkdir(parents=True, exist_ok=True)
             j+=1
             print(path)
-            #doc.render(contex)
-            #doc.save(path)
+            doc.render(contex)
+            doc.save(path)
 
     def show_file(self):
         job = self.joblist[self.jobIndexList[self.selectedItem]]
         path = job.get_filepath('f')
+
+
         self.database.downloadImage(path)
         for i in range(0,4):
             try:
