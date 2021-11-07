@@ -20,6 +20,8 @@ class Ui_MainWindow(object):
         self.user_collection = self.database.getChildData("Users")
         self.joblist = list()
         self.jobIndexList = list()
+        self.kucukyali_count = 0
+        self.sutluce_count = 0
 
 
 
@@ -41,6 +43,10 @@ class Ui_MainWindow(object):
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
+        self.logo = QtWidgets.QLabel(self.centralwidget)
+        self.logo.setPixmap(QtGui.QPixmap("logotr.png").scaled(192, 88, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation))
+        self.logo.setAlignment(QtCore.Qt.AlignCenter)
+        self.verticalLayout_3.addWidget(self.logo)
         self.lineEdit.setSizePolicy(sizePolicy)
         self.lineEdit.setObjectName("lineEdit")
         self.verticalLayout_3.addWidget(self.lineEdit)
@@ -67,6 +73,12 @@ class Ui_MainWindow(object):
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setObjectName("pushButton")
         self.verticalLayout_3.addWidget(self.pushButton)
+        self.sutluce_info = QtWidgets.QLabel(self.centralwidget)
+        self.sutluce_info.setText("Sütlüce Yapılan İş: ")
+        self.verticalLayout_3.addWidget(self.sutluce_info)
+        self.kucukyali_info = QtWidgets.QLabel(self.centralwidget)
+        self.kucukyali_info.setText("Küçükyalı Yapılan İş: ")
+        self.verticalLayout_3.addWidget(self.kucukyali_info)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_3.addItem(spacerItem)
         self.verticalLayout.addLayout(self.verticalLayout_3)
@@ -143,7 +155,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
 
-
+        self.lineEdit.textChanged.connect(self.line_changed)
         self.listWidget.itemClicked.connect(self.listwidgetclicked)
         self.pushButton.clicked.connect(self.report)
         self.search.clicked.connect(self.filter)
@@ -185,15 +197,29 @@ class Ui_MainWindow(object):
 
     def list(self):
         j = 0
+        self.listWidget.clear()
+        self.jobIndexList.clear()
+        self.joblist.clear()
         for i in self.jobs_collection:
             if type(i) is dict:
 
                 self.joblist.append(Jobs.Jobs(i, self.user_collection[int(i["user_id"])]["name"], self.user_collection[int(i["user_id"])]["campus"]))
                 self.jobIndexList.append(j)
-                j+=1
 
+                if self.joblist[j].get_single_info("campus") == 'S':
+                    self.sutluce_count += 1
+
+                else:
+                    self.kucukyali_count += 1
+
+
+
+                j+=1
+        self.campus_counts()
         for i in self.jobIndexList:
             self.listWidget.addItem(self.joblist[i].get_single_info("description"))
+
+
 
     def filter(self):
 
@@ -207,11 +233,19 @@ class Ui_MainWindow(object):
         for i in self.joblist:
 
             date = datetime.datetime.strptime(i.get_single_info("date"), "%d.%m.%Y,%H:%M")
-            if date >= start_date and date <= end_date :
+            if date >= start_date and date <= end_date:
                 self.jobIndexList.append(j)
 
-            j += 1
 
+                if i.get_single_info("campus") == 'S':
+                    self.sutluce_count += 1
+
+                else:
+                    self.kucukyali_count += 1
+
+
+            j += 1
+        self.campus_counts()
         self.listWidget.clear()
         for i in self.jobIndexList:
 
@@ -244,3 +278,32 @@ class Ui_MainWindow(object):
                 self.pixmaps[i].setPixmap(QtGui.QPixmap(pathT).scaled(200, 200, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation))
             except Exception as e:
                 print(e)
+
+    def line_changed(self, text):
+
+        if len(text) > 2:
+            text = text.lower().replace(" ", "")
+            jobIndexList_copy = self.jobIndexList.copy()
+            self.jobIndexList.clear()
+            for i in jobIndexList_copy:
+                job = self.joblist[i]
+                place = job.get_single_info("place").lower().replace(" ","")
+
+                if text in place:
+                    self.jobIndexList.append(i)
+
+            self.listWidget.clear()
+            for i in self.jobIndexList:
+                self.listWidget.addItem(self.joblist[i].get_single_info("description"))
+        else:
+            self.list()
+
+    def campus_counts(self):
+
+        ktext = "Küçükyalı Yapılan İş: " + str(self.kucukyali_count)
+        stext = "Sütlüce Yapılan İş: " + str(self.sutluce_count)
+
+        self.sutluce_info.setText(stext)
+        self.kucukyali_info.setText(ktext)
+        self.kucukyali_count = 0
+        self.sutluce_count = 0
