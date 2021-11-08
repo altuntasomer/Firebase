@@ -263,7 +263,7 @@ class Ui_MainWindow(object):
             j+=1
             doc = DocxTemplate("sablona.docx")
             doc.render(contex)
-            doc.save(path + "/rapor.docx")
+            doc.save(path + ".docx")
 
     def show_file(self):
         job = self.joblist[self.jobIndexList[self.selectedItem]]
