@@ -18,6 +18,10 @@ class Ui_MainWindow(object):
         self.database = Database.Database(config)
         self.jobs_collection = self.database.getChildData("Jobs")
         self.user_collection = self.database.getChildData("Users")
+        self.generator_collection = self.database.getChildData("Generator")
+        self.chiller_collection = self.database.getChildData("Chiller")
+        self.heater_collection = self.database.getChildData("Heater")
+        self.ups_collection = self.database.getChildData("Ups")
         self.joblist = list()
         self.jobIndexList = list()
         self.kucukyali_count = 0

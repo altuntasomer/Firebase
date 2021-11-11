@@ -1,7 +1,6 @@
 from datetime import datetime
 from datetime import timedelta
-from docxtpl import DocxTemplate
-import jinja2
+
 class Jobs():
 
     def __init__(self, info, user, campus):
